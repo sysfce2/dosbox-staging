@@ -30,9 +30,9 @@
 // forward references
 class Fraction;
 
-constexpr auto NoneShaderName     = "none";
-constexpr auto FallbackShaderName = NoneShaderName;
+constexpr auto BilinearShaderName = "interpolation/bilinear";
 constexpr auto SharpShaderName    = "interpolation/sharp";
+constexpr auto FallbackShaderName = BilinearShaderName;
 
 constexpr auto AutoGraphicsStandardShaderName = "crt-auto";
 constexpr auto AutoMachineShaderName          = "crt-auto-machine";
@@ -103,12 +103,25 @@ enum class ShaderMode {
 	AutoArcadeSharp
 };
 
+enum TextureFilterMode {
+	// Nearest-neighbour interpolation
+	Nearest,
+
+	// Bilinear interpolation
+	Linear
+};
+
+// The default setttings are important; these are the settings we get if the
+// shader doesn't override them via custom pragmas.
 struct ShaderSettings {
-	bool use_npot_texture        = false;
-	bool use_srgb_texture        = false;
-	bool use_srgb_framebuffer    = false;
+	bool use_npot_texture     = false;
+	bool use_srgb_texture     = false;
+	bool use_srgb_framebuffer = false;
+
 	bool force_single_scan       = false;
 	bool force_no_pixel_doubling = false;
+
+	TextureFilterMode texture_filter_mode = TextureFilterMode::Linear;
 };
 
 struct ShaderInfo {

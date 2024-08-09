@@ -257,6 +257,12 @@ std::string ShaderManager::MapShaderName(const std::string& name) const
 	// Map shader aliases
 	if (name == "sharp") {
 		return SharpShaderName;
+
+	} else if (name == "bilinear" || name == "none") {
+		return BilinearShaderName;
+
+	} else if (name == "nearest") {
+		return "interpolation/nearest";
 	}
 
 	// Map legacy shader names
@@ -361,6 +367,9 @@ ShaderSettings ShaderManager::ParseShaderSettings(const std::string& shader_name
 
 			} else if (pragma == "force_no_pixel_doubling") {
 				settings.force_no_pixel_doubling = true;
+
+			} else if (pragma == "use_nearest_texture_filter") {
+				settings.texture_filter_mode = TextureFilterMode::Nearest;
 			}
 			++next;
 		}

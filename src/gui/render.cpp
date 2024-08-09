@@ -546,12 +546,12 @@ static bool force_no_pixel_doubling = false;
 //  1) Single scanning or no pixel doubling is requested by the OpenGL shader.
 //  2) The interpolation mode is nearest-neighbour in texture output mode.
 //
-// The default `interpolation/sharp.glsl` shader requests both single scanning
-// and no pixel doubling because it scales pixels as flat adjacent rectangles.
-// This not only produces identical output versus double scanning and
-// pixel doubling, but also provides finer integer scaling steps (especially
-// important on sub-4K screens), plus improves performance on low-end systems
-// like the Raspberry Pi.
+// The default `interpolation/sharp.glsl` and `interpolation/nearest.glsl`
+// shaders requests both single scanning and no pixel doubling because it scales
+// pixels as flat adjacent rectangles. This not only produces identical output
+// versus double scanning and pixel doubling, but also provides finer integer
+// scaling steps (especially important on sub-4K screens), plus improves
+// performance on low-end systems like the Raspberry Pi.
 //
 // The same reasoning applies to nearest-neighbour interpolation in texture
 // output mode.
@@ -569,14 +569,8 @@ static void setup_scan_and_pixel_doubling()
 
 	case RenderingBackend::OpenGl: {
 		const auto shader_info = get_shader_manager().GetCurrentShaderInfo();
-		const auto none_shader_active = (shader_info.name == NoneShaderName);
-		const auto double_scan_enabled = none_shader_active;
-
-		force_vga_single_scan = (shader_info.settings.force_single_scan ||
-		                         double_scan_enabled);
-
-		force_no_pixel_doubling = (shader_info.settings.force_no_pixel_doubling ||
-		                           double_scan_enabled);
+		force_vga_single_scan = shader_info.settings.force_single_scan;
+		force_no_pixel_doubling = shader_info.settings.force_no_pixel_doubling;
 	} break;
 
 	default: assertm(false, "Invalid RenderindBackend value");
@@ -1043,9 +1037,21 @@ static void init_render_settings(Section_prop& secprop)
 	        "  crt-auto-arcade-sharp:  A sharper variant of the arcade shader for those who\n"
 	        "                          like the thick scanlines but want to retain the\n"
 	        "                          horizontal sharpness of a typical PC monitor.\n"
-	        "Other options include 'sharp', 'none', a shader listed using the\n"
-	        "'--list-glshaders' command-line argument, or an absolute or relative path\n"
-	        "to a file. In all cases, you may omit the shader's '.glsl' file extension.");
+	        "\n"
+	        "Other shader options include (non-exhaustive list):\n"
+	        "  sharp:                  Upscale the image treating the pixels as rectangles.\n"
+	        "                          Results in a sharp image with minimum blur.\n"
+	        "  bilinear:               Upscale the image using bilinear interpolation\n"
+	        "                          (results in a blurry image).\n"
+	        "  nearest:                Upscale the image using nearest-neighbour\n"
+	        "                          interpolation (also known as \"no bilinear\"). Results\n"
+	        "                          in the sharpest possible image at the expense of\n"
+	        "                          uneven pixels (this is less of an issue on high\n"
+	        "                          resolution screens).\n"
+	        "\n"
+	        "Start DOSBox Staging with the '--list-glshaders' command line option to see the\n"
+	        "full list of available shaders. You can also use an absolute or relative path to\n"
+	        "a file. In all cases, you may omit the shader's '.glsl' file extension.");
 	string_prop->SetEnabledOptions({
 #if C_OPENGL
 		"glshader",

@@ -107,9 +107,6 @@ MMX_reg* lookupRMregMM[256] = {
 
 void setFPUTagEmpty()
 {
-	FPU_SetCW(0x37F);
-	fpu.sw      = 0;
-	TOP         = FPU_GET_TOP();
 	fpu.tags[0] = TAG_Empty;
 	fpu.tags[1] = TAG_Empty;
 	fpu.tags[2] = TAG_Empty;
@@ -119,4 +116,10 @@ void setFPUTagEmpty()
 	fpu.tags[6] = TAG_Empty;
 	fpu.tags[7] = TAG_Empty;
 	fpu.tags[8] = TAG_Valid; // is only used by us
+
+#if !C_FPU_X86
+	for (auto& reg_memcpy : fpu.regs_memcpy) {
+		reg_memcpy.reset();
+	}
+#endif
 }
