@@ -1,10 +1,7 @@
-// SPDX-FileCopyrightText:  2024-2025 The DOSBox Staging Team
+// SPDX-FileCopyrightText:  2024-2026 The DOSBox Staging Team
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "dosbox.h"
-
-#if !defined(WIN32)
-#if !C_COREFOUNDATION
 
 #include "host_locale.h"
 
@@ -1427,6 +1424,3 @@ const HostLanguages& GetHostLanguages()
 
 	return *locale;
 }
-
-#endif
-#endif

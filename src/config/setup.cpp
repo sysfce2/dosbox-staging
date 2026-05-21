@@ -903,7 +903,7 @@ PropMultiValRemain* SectionProp::AddMultiValRemain(const std::string& _propname,
 
 int SectionProp::GetInt(const std::string& _propname) const
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (property->propname == _propname) {
 			return property->GetValue();
 		}
@@ -913,7 +913,7 @@ int SectionProp::GetInt(const std::string& _propname) const
 
 bool SectionProp::GetBool(const std::string& _propname) const
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (property->propname == _propname) {
 			return property->GetValue();
 		}
@@ -923,7 +923,7 @@ bool SectionProp::GetBool(const std::string& _propname) const
 
 double SectionProp::GetDouble(const std::string& _propname) const
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (property->propname == _propname) {
 			return property->GetValue();
 		}
@@ -933,7 +933,7 @@ double SectionProp::GetDouble(const std::string& _propname) const
 
 PropPath* SectionProp::GetPath(const std::string& _propname) const
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (property->propname == _propname) {
 			auto val = dynamic_cast<PropPath*>(property);
 			if (val) {
@@ -948,7 +948,7 @@ PropPath* SectionProp::GetPath(const std::string& _propname) const
 
 PropMultiVal* SectionProp::GetMultiVal(const std::string& _propname) const
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (property->propname == _propname) {
 			auto val = dynamic_cast<PropMultiVal*>(property);
 			if (val) {
@@ -963,7 +963,7 @@ PropMultiVal* SectionProp::GetMultiVal(const std::string& _propname) const
 
 PropMultiValRemain* SectionProp::GetMultiValRemain(const std::string& _propname) const
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (property->propname == _propname) {
 			auto val = dynamic_cast<PropMultiValRemain*>(property);
 			if (val) {
@@ -978,7 +978,7 @@ PropMultiValRemain* SectionProp::GetMultiValRemain(const std::string& _propname)
 
 Property* SectionProp::GetProperty(int index)
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (!index--) {
 			return property;
 		}
@@ -988,7 +988,7 @@ Property* SectionProp::GetProperty(int index)
 
 Property* SectionProp::GetProperty(const std::string_view propname)
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (iequals(property->propname, propname)) {
 			return property;
 		}
@@ -998,7 +998,7 @@ Property* SectionProp::GetProperty(const std::string_view propname)
 
 std::string SectionProp::GetString(const std::string& _propname) const
 {
-	for (const auto &property : properties) {
+	for (const auto& property : properties) {
 		if (iequals(property->propname, _propname)) {
 			return (property->GetValue());
 		}
@@ -1046,6 +1046,8 @@ Hex SectionProp::GetHex(const std::string& _propname) const
 
 bool SectionProp::HandleInputLine(const std::string& line)
 {
+	assert(control);
+
 	// Parse a configuration setting in the 'setting_name = setting_value'
 	// format
 	const std::string::size_type loc = line.find('=');
@@ -1074,12 +1076,12 @@ bool SectionProp::HandleInputLine(const std::string& line)
 	trim(setting_value_str);
 
 	// Find the configuration setting and try to set it
-	for (auto& p : properties) {
-		if (strcasecmp(p->propname.c_str(), setting_name.c_str()) != 0) {
+	for (auto& prop : properties) {
+		if (strcasecmp(prop->propname.c_str(), setting_name.c_str()) != 0) {
 			continue;
 		}
 
-		if (p->IsDeprecated()) {
+		if (prop->IsDeprecated()) {
 			NOTIFY_DisplayWarning(Notification::Source::Console,
 			                      "CONFIG",
 			                      "PROGRAM_CONFIG_DEPRECATED_SETTING",
@@ -1090,12 +1092,14 @@ bool SectionProp::HandleInputLine(const std::string& line)
 			                      create_setting_help_msg_name(
 			                              setting_name));
 
-			if (!p->IsDeprecatedButAllowed()) {
+			if (!prop->IsDeprecatedButAllowed()) {
 				return false;
 			}
 		}
 
-		return p->SetValue(setting_value_str);
+		control->AppendParsedSetting(GetName(), prop->propname);
+
+		return prop->SetValue(setting_value_str);;
 	}
 
 	// We couldn't find the config setting; display an error

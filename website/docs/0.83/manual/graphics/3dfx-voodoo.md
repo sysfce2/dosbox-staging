@@ -65,6 +65,26 @@ penalty whatsoever.
     </div>
 
 
+## Performance and memory
+
+The [`voodoo_memsize`](#voodoo_memsize) setting controls how much video memory
+the emulated Voodoo card has. The default 4 MB gives you 2 MB for the frame
+buffer and a single texture mapping unit (TMU) with 2 MB --- perfectly adequate
+for most games. The 12 MB option adds a second TMU and bumps every memory pool
+to 4 MB, which benefits texture-heavy titles.
+
+Because DOSBox Staging emulates the Voodoo entirely in software (no OpenGL
+passthrough), rendering is CPU-intensive. The
+[`voodoo_threads`](#voodoo_threads) setting distributes this work across
+multiple cores. The default `auto` scales up to 16 threads based on available
+cores; higher values help with demanding games, but setting the count above your
+CPU's actual core count will hurt performance rather than help it.
+
+Real Voodoo hardware always applied bilinear texture filtering, and
+[`voodoo_bilinear_filtering`](#voodoo_bilinear_filtering) matches that
+behaviour by default. Disabling it produces sharper but blockier textures.
+
+
 ## Configuration settings
 
 You can set the 3dfx Voodoo parameters in the `[voodoo]` configuration
@@ -123,8 +143,7 @@ section.
 :   Use bilinear filtering to emulate the 3dfx Voodoo's texture smoothing
     effect. This is enabled by default to match the look of real Voodoo
     hardware, which always applied bilinear texture filtering. Disabling it
-    gives a sharper but less authentic look, and may help performance on
-    slower systems.
+    gives a sharper but less authentic look.
 
     Possible values: `on` *default*{ .default }, `off`
 

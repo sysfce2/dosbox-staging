@@ -16,18 +16,33 @@ The following DOS games are known to use the ReelMagic card:
 
 <div class="compact" markdown>
 
-- [Crime Patrol](https://www.mobygames.com/game/459/crime-patrol/)
-- [Crime Patrol 2: Drug Wars](https://www.mobygames.com/game/768/drug-wars/)
-- [Dragon's Lair](https://www.mobygames.com/game/1504/dragons-lair/)
-- [Entity](https://www.mobygames.com/game/6072/entity/)
-- [Flash Traffic: City of Angels](https://www.mobygames.com/game/14651/flash-traffic-city-of-angels/)
-- [Lord of the Rings](https://www.mobygames.com/game/3870/jrr-tolkiens-the-lord-of-the-rings-vol-i/) (Interplay, 1993)
-- [Man Enough](https://www.mobygames.com/game/29122/man-enough/)
-- [Return to Zork](https://www.mobygames.com/game/1219/return-to-zork/)
-- [Space Ace](https://www.mobygames.com/game/6009/space-ace/)
-- [The Horde](https://www.mobygames.com/game/6142/the-horde/)
+- [Crime Patrol (1993)](https://www.mobygames.com/game/459/crime-patrol/)
+- [Crime Patrol 2: Drug Wars (1993)](https://www.mobygames.com/game/768/drug-wars/)
+- [Dragon's Lair (1993)](https://www.mobygames.com/game/1504/dragons-lair/)
+- [Entity (1995)](https://www.mobygames.com/game/6072/entity/)
+- [Flash Traffic: City of Angels (1994)](https://www.mobygames.com/game/14651/flash-traffic-city-of-angels/)
+- [Lord of the Rings (1990)](https://www.mobygames.com/game/3870/jrr-tolkiens-the-lord-of-the-rings-vol-i/)
+- [Man Enough (1994)](https://www.mobygames.com/game/29122/man-enough/)
+- [Return to Zork (1993)](https://www.mobygames.com/game/1219/return-to-zork/)
+- [Space Ace (1994)](https://www.mobygames.com/game/6009/space-ace/)
+- [The Horde (1994)](https://www.mobygames.com/game/6142/the-horde/)
 
 </div>
+
+
+## Troubleshooting video playback
+
+ReelMagic games encode their MPEG video streams using a 32-bit key for copy
+protection. DOSBox Staging auto-detects this key for most games, but if videos
+play incorrectly (wrong speed, garbled frames), you may need to set
+[`reelmagic_key`](#reelmagic_key) manually. The `common` key works for most
+titles; The Horde uses a unique key (`thehorde`). A custom hex value can be
+provided for other games.
+
+If videos still play at the wrong speed despite the correct key, try
+overriding [`reelmagic_fcode`](#reelmagic_fcode) with a specific frame rate
+code (1--7). The default `0` auto-detects the rate from the video stream.
+Common values: 1=23.976, 2=24, 3=25, 4=29.97, 5=30 FPS.
 
 
 ## Configuration settings

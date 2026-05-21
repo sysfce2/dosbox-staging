@@ -136,11 +136,11 @@ Config& Config::operator=(Config&& source) noexcept
 	}
 
 	// Move each member
-	cmdline         = std::move(source.cmdline);
-	sections        = std::move(source.sections);
-	secure_mode     = std::move(source.secure_mode);
-	startup_params  = std::move(source.startup_params);
-	config_files    = std::move(source.config_files);
+	cmdline        = std::move(source.cmdline);
+	sections       = std::move(source.sections);
+	secure_mode    = std::move(source.secure_mode);
+	startup_params = std::move(source.startup_params);
+	config_files   = std::move(source.config_files);
 
 	loaded_config_paths_canonical = std::move(source.loaded_config_paths_canonical);
 
@@ -601,4 +601,31 @@ void Config::ParseArguments()
 	arguments.set  = cmdline->FindRemoveVectorArgument("set");
 
 	arguments.editconf = cmdline->FindRemoveOptionalArgument("editconf");
+}
+
+static std::string make_scoped_setting_name(const std::string& section_name,
+                                            const std::string& property_name)
+{
+	return format_str("%s.%s", section_name.c_str(), property_name.c_str());
+}
+
+void Config::AppendParsedSetting(const std::string& section_name,
+                                 const std::string& property_name)
+{
+	parsed_settings.emplace_back(
+	        make_scoped_setting_name(section_name, property_name));
+}
+
+int Config::GetSettingParseOrder(const std::string& section_name,
+                                 const std::string& property_name)
+{
+	const auto it = std::ranges::find(parsed_settings,
+	                                  make_scoped_setting_name(section_name,
+	                                                           property_name));
+
+	if (it == parsed_settings.end()) {
+		return -1;
+	} else {
+		return it - parsed_settings.begin();
+	}
 }

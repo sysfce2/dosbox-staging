@@ -136,17 +136,59 @@
       }
     },
     {
+      "name": "debug-windows-vs2022",
+      "displayName": "Debug (Windows host CPU with VS2022)",
+      "description": "Configure for Debug build",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/debug-windows-vs2022",
+      "cacheVariables": {
+        "IS_PRESET_USED" : "TRUE",
+        "CMAKE_GENERATOR_TOOLSET": "ClangCL",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_FIND_PACKAGE_PREFER_CONFIG" : "ON",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_HOST_TRIPLET": "x64-windows"
+      },
+      "environment": {
+        "UseMultiToolTask": "true",
+        "EnforceProcessCountAcrossBuilds": "true"
+      }
+    },
+    {
+      "name": "release-windows-vs2022",
+      "displayName": "Release (Windows host CPU with VS2022)",
+      "description": "Configure for Release build",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/release-windows-vs2022",
+      "cacheVariables": {
+        "IS_PRESET_USED" : "TRUE",
+        "CMAKE_GENERATOR_TOOLSET": "ClangCL",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_FIND_PACKAGE_PREFER_CONFIG" : "ON",
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_HOST_TRIPLET": "x64-windows"
+      },
+      "environment": {
+        "UseMultiToolTask": "true",
+        "EnforceProcessCountAcrossBuilds": "true"
+      }
+    },
+    {
       "name": "debug-windows",
       "displayName": "Debug (Windows host CPU)",
       "description": "Configure for Debug build",
-      "generator": "Visual Studio 17 2022",
+      "generator": "Visual Studio 18 2026",
       "binaryDir": "${sourceDir}/build/debug-windows",
       "cacheVariables": {
         "IS_PRESET_USED" : "TRUE",
         "CMAKE_GENERATOR_TOOLSET": "ClangCL",
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_FIND_PACKAGE_PREFER_CONFIG" : "ON",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_HOST_TRIPLET": "x64-windows"
       },
       "environment": {
         "UseMultiToolTask": "true",
@@ -157,14 +199,16 @@
       "name": "release-windows",
       "displayName": "Release (Windows host CPU)",
       "description": "Configure for Release build",
-      "generator": "Visual Studio 17 2022",
+      "generator": "Visual Studio 18 2026",
       "binaryDir": "${sourceDir}/build/release-windows",
       "cacheVariables": {
         "IS_PRESET_USED" : "TRUE",
         "CMAKE_GENERATOR_TOOLSET": "ClangCL",
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_FIND_PACKAGE_PREFER_CONFIG" : "ON",
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_HOST_TRIPLET": "x64-windows"
       },
       "environment": {
         "UseMultiToolTask": "true",
@@ -183,6 +227,22 @@
       "name": "release-windows-manual",
       "displayName": "Release (Windows, with offline manual)",
       "inherits": "release-windows",
+      "cacheVariables": {
+        "OPT_DOCUMENTATION": "ON"
+      }
+    },
+    {
+      "name": "debug-windows-vs2022-manual",
+      "displayName": "Debug (Windows, with offline manual)",
+      "inherits": "debug-windows-vs2022",
+      "cacheVariables": {
+        "OPT_DOCUMENTATION": "ON"
+      }
+    },
+    {
+      "name": "release-windows-vs2022-manual",
+      "displayName": "Release (Windows, with offline manual)",
+      "inherits": "release-windows-vs2022",
       "cacheVariables": {
         "OPT_DOCUMENTATION": "ON"
       }
@@ -242,6 +302,16 @@
       "nativeToolOptions": ["-quiet"]
     },
     {
+      "name": "debug-windows-vs2022",
+      "configurePreset" : "debug-windows-vs2022",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-windows-vs2022",
+      "configurePreset" : "release-windows-vs2022",
+      "configuration": "Release"
+    },
+    {
       "name": "debug-windows",
       "configurePreset" : "debug-windows",
       "configuration": "Debug"
@@ -259,6 +329,16 @@
     {
       "name": "release-windows-manual",
       "configurePreset" : "release-windows-manual",
+      "configuration": "Release"
+    },
+    {
+      "name": "debug-windows-vs2022-manual",
+      "configurePreset" : "debug-windows-vs2022-manual",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-windows-vs2022-manual",
+      "configurePreset" : "release-windows-vs2022-manual",
       "configuration": "Release"
     }
   ],
@@ -342,6 +422,22 @@
       }
     },
     {
+      "name": "debug-windows-vs2022",
+      "configurePreset" : "debug-windows-vs2022",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release-windows-vs2022",
+      "configurePreset" : "release-windows-vs2022",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
       "name": "debug-windows",
       "configurePreset" : "debug-windows",
       "configuration": "Debug",
@@ -368,6 +464,22 @@
     {
       "name": "release-windows-manual",
       "configurePreset" : "release-windows-manual",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug-windows-vs2022-manual",
+      "configurePreset" : "debug-windows-vs2022-manual",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release-windows-vs2022-manual",
+      "configurePreset" : "release-windows-vs2022-manual",
       "configuration": "Release",
       "output": {
         "outputOnFailure": true

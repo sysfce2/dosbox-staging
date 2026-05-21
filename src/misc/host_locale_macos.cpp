@@ -1,9 +1,7 @@
-// SPDX-FileCopyrightText:  2024-2025 The DOSBox Staging Team
+// SPDX-FileCopyrightText:  2024-2026 The DOSBox Staging Team
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "dosbox.h"
-
-#if C_COREFOUNDATION
 
 #include "host_locale.h"
 
@@ -848,5 +846,3 @@ void StdLibLocale::DetectTimeDateFormat([[maybe_unused]] const std::locale& loca
 		date_separator = candidate_1;
 	}
 }
-
-#endif

@@ -47,17 +47,17 @@ that can use a scroll wheel, but no DOS game is known to use it.
 
 DOSBox Staging can emulate several serial (COM port) mouse types:
 
-- **Microsoft mouse** --- 2 buttons, the most widely compatible type.
-- **Logitech mouse** --- 3 buttons, mostly compatible with Microsoft mouse.
-- **Wheel mouse** --- 3 buttons + wheel, mostly compatible with Microsoft mouse.
+- **Microsoft mouse** --- 2 buttons, the most widely compatible type
+- **Logitech mouse** --- 3 buttons, mostly compatible with Microsoft mouse
+- **Wheel mouse** --- 3 buttons + wheel, mostly compatible with Microsoft mouse
 - **Mouse Systems mouse** --- 3 buttons, an older protocol NOT compatible with
-  Microsoft mice. A few programs require this type.
+  Microsoft mice. A few programs require this type
 
 To enable a serial mouse, use the `SERIAL 1 mouse` command (this attaches it
 to the COM1 port), or edit the [Serial ports](../networking/serial-ports.md)
 configuration.
 By default, DOSBox Staging tries to determine what type of mouse the program
-expects. See [com_mouse_model](#com_mouse_model) for details.
+expects. See [`com_mouse_model`](#com_mouse_model) for details.
 
 
 ## Dual mouse gaming
@@ -106,6 +106,47 @@ driver settings:
   to `2`.
 
 
+## Advanced driver options
+
+The [`builtin_dos_mouse_driver_options`](#builtin_dos_mouse_driver_options)
+setting accepts a list of options that address rare edge cases:
+
+- **`immediate`** --- Updates mouse movement counters without waiting for the
+  next interrupt, reducing input latency. This can help in fast-paced FPS and
+  arcade games, but is known to cause issues with
+  [Ultima Underworld: The Stygian Abyss](https://www.mobygames.com/game/690/ultima-underworld-the-stygian-abyss/) and
+  [Ultima Underworld II: Labyrinth of Worlds](https://www.mobygames.com/game/691/ultima-underworld-ii-labyrinth-of-worlds/).
+
+- **`modern`** --- Emulates Microsoft mouse driver v7.0+ behaviour instead of
+  v6.0. Only [Descent II](https://www.mobygames.com/game/2509/descent-ii/)
+  with the official Voodoo patch is known to require this.
+
+- **`no-granularity`** --- Disables mouse position granularity filtering. Only
+  [Joan of Arc: Siege & the Sword](https://www.mobygames.com/game/3769/joan-of-arc-siege-the-sword/)
+  in Hercules mode is known to require this.
+
+You can combine multiple options; for example,
+`builtin_dos_mouse_driver_options = immediate, modern`.
+
+
+## Mouse capture and multi-monitor
+
+[`mouse_middle_release`](#mouse_middle_release) is enabled by default and lets
+you release the captured mouse by middle-clicking. Disable it if the game uses
+the middle mouse button.
+
+[`mouse_multi_display_aware`](#mouse_multi_display_aware) allows seamless mouse
+behaviour and pointer release to work in fullscreen on multi-monitor systems.
+Disable it if DOSBox incorrectly detects multiple displays (e.g., mirrored
+displays or an HDMI audio receiver showing up as a monitor).
+
+[`virtualbox_mouse`](#virtualbox_mouse) and
+[`vmware_mouse`](#vmware_mouse) enable virtual mouse interfaces for third-party
+[Windows 3.1](../using-dosbox-staging/windows-31.md) mouse drivers. Both
+default to on and are only relevant when running Windows 3.1 under DOSBox with
+custom drivers that use these protocols.
+
+
 ## Configuration settings
 
 You can set the mouse parameters in the `[mouse]` configuration section.
@@ -133,8 +174,8 @@ You can set the mouse parameters in the `[mouse]` configuration section.
 
     !!! note
 
-        - The [ps2_mouse_model](#ps2_mouse_model) and
-          [com_mouse_model](#com_mouse_model) settings have no effect on the
+        - The [`ps2_mouse_model`](#ps2_mouse_model) and
+          [`com_mouse_model`](#com_mouse_model) settings have no effect on the
           built-in driver.
 
         - The driver is auto-disabled if you boot into real MS-DOS or Windows
@@ -143,8 +184,8 @@ You can set the mouse parameters in the `[mouse]` configuration section.
 
         - To use a real DOS mouse driver (e.g., `MOUSE.COM` or
           `CTMOUSE.EXE`), configure the mouse type with
-          [ps2_mouse_model](#ps2_mouse_model) or
-          [com_mouse_model](#com_mouse_model), then load the driver.
+          [`ps2_mouse_model`](#ps2_mouse_model) or
+          [`com_mouse_model`](#com_mouse_model), then load the driver.
 
 
 ##### builtin_dos_mouse_driver_model
@@ -186,8 +227,8 @@ You can set the mouse parameters in the `[mouse]` configuration section.
 
         Known games requiring the threshold to be set to `2`:
 
-        - [Ultima Underworld: The Stygian Abyss](https://www.mobygames.com/game/690/ultima-underworld-the-stygian-abyss/)
-        - [Ultima Underworld II: Labyrinth of Worlds](https://www.mobygames.com/game/691/ultima-underworld-ii-labyrinth-of-worlds/)
+        - [Ultima Underworld: The Stygian Abyss (1992)](https://www.mobygames.com/game/690/ultima-underworld-the-stygian-abyss/)
+        - [Ultima Underworld II: Labyrinth of Worlds (1993)](https://www.mobygames.com/game/691/ultima-underworld-ii-labyrinth-of-worlds/)
 
 
 ##### builtin_dos_mouse_driver_options
@@ -217,7 +258,7 @@ You can set the mouse parameters in the `[mouse]` configuration section.
 :   Set the default COM (serial) mouse model, or in other words, the type of
     the virtual mouse plugged into the emulated COM ports. The setting has no
     effect on the built-in mouse driver (see
-    [builtin_dos_mouse_driver](#builtin_dos_mouse_driver)).
+    [`builtin_dos_mouse_driver`](#builtin_dos_mouse_driver)).
 
     Possible values:
 
@@ -319,7 +360,7 @@ You can set the mouse parameters in the `[mouse]` configuration section.
 :   Set the PS/2 AUX port mouse model, or in other words, the type of the
     virtual mouse plugged into the emulated PS/2 mouse port. The setting has
     no effect on the built-in mouse driver (see
-    [builtin_dos_mouse_driver](#builtin_dos_mouse_driver)).
+    [`builtin_dos_mouse_driver`](#builtin_dos_mouse_driver)).
 
     Possible values:
 

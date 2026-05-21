@@ -1,8 +1,6 @@
-target_sources(libdosboxcommon PRIVATE
+target_sources(dosboxcommon PRIVATE
   cdrom.cpp
   cdrom_image.cpp
-  cdrom_ioctl_linux.cpp
-  cdrom_win32.cpp
   dos.cpp
   dos_classes.cpp
   dos_code_page.cpp
@@ -16,6 +14,7 @@ target_sources(libdosboxcommon PRIVATE
   dos_misc.cpp
   dos_mscdex.cpp
   dos_programs.cpp
+  dos_stacks.cpp
   dos_tables.cpp
   dos_windows.cpp
   drive_cache.cpp
@@ -29,7 +28,6 @@ target_sources(libdosboxcommon PRIVATE
 
   programs/attrib.cpp
   programs/autotype.cpp
-  programs/biostest.cpp
   programs/boot.cpp
   programs/choice.cpp
   programs/clip.cpp
@@ -59,8 +57,23 @@ target_sources(libdosboxcommon PRIVATE
   programs/tree.cpp
 )
 
+# Windows-only CD-ROM ioctl backend
+if (DOSBOX_PLATFORM_WINDOWS)
+  target_sources(dosboxcommon PRIVATE cdrom_win32.cpp)
+endif()
+
+# Linux-only CD-ROM ioctl backend
+if (DOSBOX_PLATFORM_LINUX)
+  target_sources(dosboxcommon PRIVATE cdrom_ioctl_linux.cpp)
+endif()
+
+# Debugger-only DOS command (see biostest.h)
+if (OPT_DEBUGGER)
+  target_sources(dosboxcommon PRIVATE programs/biostest.cpp)
+endif()
+
 target_sources(dosbox PRIVATE dos_files.cpp)
 
-target_link_libraries(libdosboxcommon PRIVATE
+target_link_libraries(dosboxcommon PRIVATE
   $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
 )

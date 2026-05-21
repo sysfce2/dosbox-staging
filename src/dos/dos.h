@@ -84,6 +84,8 @@ enum MediaId : uint8_t {
 };
 
 enum class DiskType { Floppy, HardDisk, CdRom };
+const char* to_string(DiskType disk_type);
+const char* to_string(DiskSpeed disk_speed);
 
 #define DOS_FILES   255
 #define DOS_DRIVES  26
@@ -304,6 +306,10 @@ bool DOS_FreeMemory(uint16_t segment);
 void DOS_FreeProcessMemory(uint16_t pspseg);
 uint16_t DOS_GetMemory(uint16_t pages);
 void DOS_FreeTableMemory();
+
+bool DOS_ShouldUseInterruptStacks(const SectionProp& section);
+void DOS_InstallInterruptStacks(const SectionProp& section);
+void DOS_UninstallInterruptStacks();
 bool DOS_SetMemAllocStrategy(uint16_t strat);
 void DOS_SetMcbFaultStrategy(const char *mcb_fault_strategy_pref);
 uint16_t DOS_GetMemAllocStrategy(void);

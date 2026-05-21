@@ -93,18 +93,6 @@
 // an assumption about availability based on OS type.
 #mesondefine SUPPORT_XINPUT2
 
-// Compiler supports Core Audio headers
-#mesondefine C_COREAUDIO
-
-// Compiler supports Core MIDI headers
-#mesondefine C_COREMIDI
-
-// Compiler supports Core Foundation headers
-#mesondefine C_COREFOUNDATION
-
-// Compiler supports Core Services headers
-#mesondefine C_CORESERVICES
-
 // Define to 1 to enable ALSA MIDI support
 #mesondefine C_ALSA
 
@@ -114,8 +102,8 @@
  * between operating systems.
  */
 
-// Define to 1 when zlib-ng support is provided by the system
-#mesondefine C_SYSTEM_ZLIB_NG
+// Define to 1 when using the native zlib-ng API
+#mesondefine C_ZLIB_NG
 
 // Defined if function clock_gettime is available
 #mesondefine HAVE_CLOCK_GETTIME

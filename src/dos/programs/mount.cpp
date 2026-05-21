@@ -937,9 +937,28 @@ bool MOUNT::ProcessPaths(MountParameters& params, bool path_relative_to_last_con
 					    ext == "ccd") {
 						params.type   = "iso";
 						params.fstype = "iso";
-					} else if (ext == "img" ||
-					           ext == "ima" || ext == "vhd") {
+					} else if (ext == "vhd") {
 						params.type = "hdd";
+					} else if (ext == "vfd" || ext == "flp" ||
+					           ext == "360" || ext == "720" ||
+					           ext == "1200" || ext == "1440") {
+						params.type = "floppy";
+					} else if (ext == "img" ||
+					           ext == "ima" || ext == "dsk") {
+						const auto file_size_kb =
+						        static_cast<uint32_t>(
+						                t2.st_size / 1024);
+						const auto& geometries =
+						        BIOS_GetDiskGeometryList();
+						const bool is_floppy = std::ranges::any_of(
+						        geometries,
+						        [file_size_kb](
+						                const DiskGeometry& geo) {
+							        return geo.ksize ==
+							               file_size_kb;
+						        });
+						params.type = is_floppy ? "floppy"
+						                        : "hdd";
 					}
 				}
 			}
@@ -1064,7 +1083,7 @@ void MOUNT::MountLocal(MountParameters& params, const std::string& local_path)
 		                                         error);
 
 		const char* msg_id = mscdex_error_to_message_id(error, false);
-		if (error == 0) { //-V457
+		if (error == 0) { //-V457 //-V547
 			NOTIFY_DisplayInfoMessage(Notification::Source::Console,
 			                          "MOUNT",
 			                          msg_id);

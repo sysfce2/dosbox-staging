@@ -17,6 +17,29 @@ multiplayer.
     at home.
 
 
+## NE2000 hardware settings
+
+The [`nicbase`](#nicbase), [`nicirq`](#nicirq), and [`macaddr`](#macaddr)
+settings configure the I/O base address, interrupt, and MAC address of the
+emulated NE2000 card. The defaults (base address 300, IRQ 3) are chosen to
+avoid
+conflicts with the Sound Blaster (base address 220) and Gravis UltraSound
+(base address 240). Your DOS packet driver and TCP/IP stack must be configured
+with the same base address and IRQ. The MAC address only needs to be changed
+if you're running multiple DOSBox Staging instances on the same network.
+
+
+## Port forwarding
+
+The [`tcp_port_forwards`](#tcp_port_forwards) and
+[`udp_port_forwards`](#udp_port_forwards) settings forward network ports from
+the host into the DOS guest. This is essential for hosting multiplayer game
+servers or running any service that needs to accept incoming connections. Ports
+can be specified as a simple list (e.g., `21 80 443`), as host-to-guest
+mappings for privileged ports (e.g., `8080:80`), or as ranges (e.g.,
+`27910-27960` for Quake multiplayer).
+
+
 ## Configuration settings
 
 You can set the Ethernet parameters in the `[ethernet]` configuration
@@ -100,4 +123,4 @@ section.
 
 :   Forward one or more UDP ports from the host into the DOS guest (unset by
     default). The format is the same as for
-    [tcp_port_forwards](#tcp_port_forwards).
+    [`tcp_port_forwards`](#tcp_port_forwards).

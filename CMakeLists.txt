@@ -22,17 +22,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL
 
 project(dosbox-staging
   LANGUAGES C CXX
-  VERSION 0.83.0
+  VERSION 0.84.0
 )
 
-set(DOSBOX_VERSION ${PROJECT_VERSION}-RC1)
+set(DOSBOX_VERSION ${PROJECT_VERSION}-alpha)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ccache support
 find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
+if (CCACHE_PROGRAM)
   set(CMAKE_C_COMPILER_LAUNCHER   "${CCACHE_PROGRAM}")
   set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
   # Direct mode is 10-fold quicker than non-direct mode
@@ -43,9 +43,14 @@ endif()
 # Disable the noisy narrowing and conversion warnings by default. Use the
 # CHECK_NARROWING() macro to opt-in these checks on a per-file basis. See
 # `src/util/checks.h` for details.
+#
+# Warning flags are set globally via add_compile_options() rather than
+# per-target because the project wants consistent diagnostics across all
+# compiled code. Vendored third-party libraries under src/libs/ opt out
+# via disable_warnings() which applies -w to suppress all warnings.
 if (MSVC)
   # /W4 displays level 1, level 2, and level 3 warnings, and all level 4
-  #(informational) warnings that aren't off by default.
+  # (informational) warnings that aren't off by default.
   add_compile_options("/wd4244" "/MP" "/W4")
 
   # Disable cl/clangcl warnings about insecure C functions
@@ -363,8 +368,8 @@ if (OPT_MANYMOUSE)
     message(WARNING "ManyMouse requires FD_ZERO support")
 
   elseif (DOSBOX_PLATFORM_MACOS)
-    include (${CMAKE_CURRENT_SOURCE_DIR}/src/libs/manymouse/cmake/FindIOKit.cmake)
-    if (NOT ${IOKit_FOUND})
+    find_library(IOKit_LIBRARY IOKit)
+    if (NOT IOKit_LIBRARY)
       message(WARNING "ManyMouse requires IOKit")
     else()
       set(C_MANYMOUSE ON)
@@ -394,12 +399,6 @@ option(OPT_DOCUMENTATION "Build offline documentation" OFF)
 if (OPT_TESTS)
   enable_testing()
 endif()
-
-# macOS
-set(C_COREAUDIO      "${DOSBOX_PLATFORM_MACOS}")
-set(C_COREMIDI       "${DOSBOX_PLATFORM_MACOS}")
-set(C_COREFOUNDATION "${DOSBOX_PLATFORM_MACOS}")
-set(C_CORESERVICES   "${DOSBOX_PLATFORM_MACOS}")
 
 # Linux
 set(C_ALSA "${DOSBOX_PLATFORM_LINUX}")
@@ -441,22 +440,49 @@ set(CUSTOM_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}")
 set(project_name "${PROJECT_NAME}")
 set(version      "${PROJECT_VERSION}")
 
+# PkgConfig is needed for speexdsp (no cmake config in vcpkg) and
+# for zlib-ng detection on system-libs builds.
+find_package(PkgConfig REQUIRED)
+
+# Detect zlib-ng (preferred) or plain zlib for the ZMBV video codec.
+#
+# On vcpkg builds, zlib-ng is always available (listed in vcpkg.json).
+# On system-libs builds (Linux), try zlib-ng first, fall back to plain zlib.
+# C_ZLIB_NG controls whether the native zlib-ng API (zlib-ng.h, zng_*)
+# or the standard zlib API (zlib.h) is used in the ZMBV codec.
+if (USE_SYSTEM_LIBS)
+  pkg_check_modules(ZLIB_NG IMPORTED_TARGET zlib-ng)
+
+  if (ZLIB_NG_FOUND)
+    set(C_ZLIB_NG ON)
+    set(ZMBV_ZLIB_TARGET PkgConfig::ZLIB_NG)
+  else()
+    find_package(ZLIB REQUIRED)
+    set(ZMBV_ZLIB_TARGET ZLIB::ZLIB)
+  endif()
+
+else() # vcpkg path
+  find_package(zlib-ng CONFIG REQUIRED)
+  set(C_ZLIB_NG ON)
+  set(ZMBV_ZLIB_TARGET zlib-ng::zlib)
+endif()
+
 configure_file(
   src/dosbox_config.h.in.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/include/dosbox_config.h
 )
 
-# Allow dynamically loading externalised vcpkg dependencies at runtime
-# from the $EXE_DIR/lib directory (must be set before 'add_executable')
+# Set RPATH so runtime-loaded shared libraries (e.g., slirp) can be
+# found in a lib/ directory next to the executable. Windows uses its
+# own DLL search path (exe directory), so RPATH is not needed there.
 if (APPLE)
   set(CMAKE_INSTALL_RPATH "@executable_path/lib")
-else()
+elseif (DOSBOX_PLATFORM_LINUX)
   set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 endif()
 set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 
 # Find common external dependencies
-find_package(PkgConfig REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_image CONFIG REQUIRED)
 find_package(iir REQUIRED)
@@ -467,14 +493,13 @@ find_package(FluidSynth REQUIRED CONFIG)
 if (C_ALSA)
   find_package(ALSA REQUIRED)
 endif()
+
+# SpeexDSP: vcpkg has no cmake config, only a .pc file
 pkg_check_modules(SPEEXDSP REQUIRED IMPORTED_TARGET speexdsp)
 
 add_executable(dosbox src/main.cpp src/dosbox.cpp)
-target_include_directories(
-  dosbox PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include
-)
 if (OPT_DEBUGGER)
-  set_target_properties( dosbox PROPERTIES OUTPUT_NAME dosbox_with_debugger)
+  set_target_properties(dosbox PROPERTIES OUTPUT_NAME dosbox_with_debugger)
 endif()
 
 # Bundle licenses, but skip the ones that are not relevant for
@@ -511,13 +536,18 @@ if (OPT_DOCUMENTATION)
   add_build_documentation()
 endif()
 
-include_directories(
+# Project-wide include paths used by the main library and standalone
+# libraries that reference project headers (dosbox_config.h, etc.).
+# Using an INTERFACE library makes these paths explicit per-target
+# instead of polluting every target via global include_directories().
+add_library(project_headers INTERFACE)
+target_include_directories(project_headers INTERFACE
   src
-  src/libs
   ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
-add_library(libdosboxcommon STATIC)
+add_library(dosboxcommon STATIC)
+target_link_libraries(dosboxcommon PUBLIC project_headers)
 
 
 # Add tests before src so that the dosbox_tests target is
@@ -532,29 +562,38 @@ add_subdirectory(src)
 # This is used by GCC and Clang by default on Linux.
 # Mac and Windows don't need this except for maybe MSYS2.
 # This is required for Linux to use all features of std::atomic.
-find_library(LIBATOMIC libatomic.so.1)
+#
+# The versioned libatomic.so.1 fallback is needed because some Linux
+# environments only ship the runtime library without the unversioned
+# libatomic.so dev symlink that find_library(NAMES atomic) expects.
+find_library(LIBATOMIC NAMES atomic libatomic.so.1)
 
-if(LIBATOMIC)
-  target_link_libraries(libdosboxcommon PRIVATE ${LIBATOMIC})
+if (LIBATOMIC)
+  target_link_libraries(dosboxcommon PRIVATE ${LIBATOMIC})
 endif()
 
-target_link_libraries(libdosboxcommon PRIVATE
+target_link_libraries(dosboxcommon PUBLIC loguru)
+target_link_libraries(dosboxcommon PRIVATE
   $<IF:$<TARGET_EXISTS:iir::iir>,iir::iir,iir::iir_static>
-  loguru
-  libdecoders
+  decoders
 )
 
 target_link_libraries(dosbox PRIVATE
-  libdosboxcommon
+  dosboxcommon
   $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
   $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
 )
 
+# Export dynamic symbols so loguru's stack traces can resolve names
+if (HAS_STACK_INCLUDES)
+  target_link_options(dosbox PRIVATE "-rdynamic")
+endif()
+
 # Remove MkDocs source-tree caches (website/.cache, __pycache__, site)
 add_custom_target(clean-manual
-  COMMAND "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_SOURCE_DIR}/website/.cache"
-  COMMAND "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_SOURCE_DIR}/website/__pycache__"
-  COMMAND "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_SOURCE_DIR}/website/site"
+  COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CMAKE_SOURCE_DIR}/website/.cache"
+  COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CMAKE_SOURCE_DIR}/website/__pycache__"
+  COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CMAKE_SOURCE_DIR}/website/site"
   COMMENT "Removing MkDocs caches"
   VERBATIM
 )

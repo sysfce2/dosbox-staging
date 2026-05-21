@@ -9,7 +9,7 @@ project(
     license: 'GPL-2.0-or-later',
     meson_version: '>= 0.59.0',
     default_options: [
-        'cpp_std=c++20',
+        'cpp_std=c++23',
         'buildtype=release',
         'b_ndebug=if-release',
         'b_staticpic=false',
@@ -691,7 +691,7 @@ if try_system_zlib_ng
     )
     if (system_zlib_ng_dep.found())
         zlib_ng_provider = 'system library'
-        conf_data.set10('C_SYSTEM_ZLIB_NG', true)
+        conf_data.set10('C_ZLIB_NG', true)
         try_builtin_zlib_ng = false
     else
         zlib_ng_provider = 'skipped (system library not found)'

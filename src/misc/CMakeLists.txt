@@ -1,16 +1,11 @@
-target_sources(libdosboxcommon PRIVATE
+target_sources(dosboxcommon PRIVATE
   ansi_code_markup.cpp
   console.cpp
   cross.cpp
   dos_rwops.cpp
   fs_utils.cpp
-  fs_utils_posix.cpp
-  fs_utils_win32.cpp
   help_util.cpp
   host_locale.cpp
-  host_locale_macos.cpp
-  host_locale_posix.cpp
-  host_locale_win32.cpp
   image_decoder.cpp
   iso_locale_codes.cpp
   messages_adjust.cpp
@@ -22,16 +17,36 @@ target_sources(libdosboxcommon PRIVATE
   video.cpp
 )
 
+if (DOSBOX_PLATFORM_WINDOWS)
+  # Windows-only filesystem helpers and locale detection
+  target_sources(dosboxcommon PRIVATE
+    fs_utils_win32.cpp
+    host_locale_win32.cpp
+  )
+  # Shlwapi needed for PathFileExistsW
+  target_link_libraries(dosboxcommon PRIVATE Shlwapi)
+
+elseif (DOSBOX_PLATFORM_MACOS)
+  # Linux & macOS-only filesystem helpers
+  target_sources(dosboxcommon PRIVATE fs_utils_posix.cpp)
+
+  # macOS-only locale detection
+  target_sources(dosboxcommon PRIVATE host_locale_macos.cpp)
+
+elseif (DOSBOX_PLATFORM_LINUX)
+  # Linux & macOS-only filesystem helpers
+  target_sources(dosboxcommon PRIVATE fs_utils_posix.cpp)
+
+  # Linux-only locale detection
+  target_sources(dosboxcommon PRIVATE host_locale_linux.cpp)
+endif()
+
 target_sources(dosbox PRIVATE messages.cpp)
 
-if(OPT_TESTS)
+if (OPT_TESTS)
   target_sources(dosbox_tests PRIVATE messages_stubs.cpp)
 endif()
 
-target_include_directories(libdosboxcommon PRIVATE ../libs/include)
-target_link_libraries(libdosboxcommon PRIVATE libwhereami)
+target_include_directories(dosboxcommon SYSTEM PRIVATE ../libs/include)
+target_link_libraries(dosboxcommon PRIVATE whereami)
 
-# Shlwapi needed for PathFileExistsW
-if(WIN32)
-  target_link_libraries(libdosboxcommon PRIVATE Shlwapi)
-endif()

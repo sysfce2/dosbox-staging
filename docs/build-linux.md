@@ -57,7 +57,7 @@ These are generic, distro-independent building instructions.
 
 ### Install the necessary build tools
 
-- GCC or Clang compiler (the compiler has to support C++20)
+- GCC or Clang compiler (the compiler has to support C++23)
 - Git
 - CMake
 - pkg-config
@@ -227,20 +227,23 @@ To run the entire test suite, execute the following (use the same CMake preset
 you used for building):
 
 ```bash
-ctest --preset debug-linux
+ctest -j 8 --preset debug-linux
 ```
+
+The `-j 8` option runs the tests in parallel on 8 CPU cores. You can adjust
+this to suit your system.
 
 To run all test cases in a single test suite, pass in the name of the suite
 with the `-R` option:
 
 ```bash
-ctest --preset debug-linux -R DOS_FilesTest
+ctest -j 8 --preset debug-linux -R DOS_FilesTest
 ```
 
 You can narrow this down to run a single test case only:
 
 ```bash
-ctest --preset debug-linux -R DOS_FilesTest.DOS_MakeName_Basic_Failures
+ctest -j 8 --preset debug-linux -R DOS_FilesTest.DOS_MakeName_Basic_Failures
 ```
 
 To run a group of tests, you can use wildcards and regexes. E.g. to run all
@@ -248,13 +251,13 @@ test cases in the `DOS_FilesTest` suite with names starting with
 `DOS_MakeName_`:
 
 ```bash
-ctest --preset debug-linux -R "DOS_FilesTest.DOS_MakeName_*"
+ctest -j 8 --preset debug-linux -R "DOS_FilesTest.DOS_MakeName_*"
 ```
 
 Pass in the `-V` option to see the DOSBox Staging log output:
 
 ```bash
-ctest --preset debug-linux -R DOS_FilesTest.DOS_MakeName_Basic_Failures -V
+ctest -j 8 --preset debug-linux -R DOS_FilesTest.DOS_MakeName_Basic_Failures -V
 ```
 
 You might want to run the test executable directly to get coloured output, and
@@ -403,7 +406,7 @@ Install dependencies listed in [README.md](README.md). Although `ccache` is
 optional, we recommend installing it because Meson will use it to greatly speed
 up builds. The minimum set of dependencies is:
 
-- C/C++ compiler with support for C++20
+- C/C++ compiler with support for C++23
 - SDL >= 2.0.5
 - Opusfile
 - Meson >= 0.56

@@ -72,13 +72,10 @@ jobs:
                   -not -path "./tools/*"    `# ignore manually managed 'tools' dir contents` \
                   -not -path "./preview"    `# ignore 'preview' dir` \
                   -not -path "./preview/*"  `# ignore 'preview' dir contents` \
-                  -not -name "README.md"    `# ignore 'README.md'` \
-                  -not -name "CNAME"        `# ignore CNAME` \
-                  -not -regex '\./[0-9]\.[0-9][0-9]'                    `# ignore x.yz dir` \
-                  -not -regex '\./[0-9]\.[0-9][0-9]/manual'             `# ignore x.yz/manual dir` \
-                  -not -regex '\./[0-9]\.[0-9][0-9]/manual/.*'          `# ignore x.yz/manual contents` \
-                  -not -regex '\./[0-9]\.[0-9][0-9]/getting-started'    `# ignore x.yz/getting-started dir` \
-                  -not -regex '\./[0-9]\.[0-9][0-9]/getting-started/.*' `# ignore x.yz/getting-started contents` \
+                  -not -path "./README.md"  `# ignore 'README.md'` \
+                  -not -path "./CNAME"      `# ignore 'CNAME'` \
+                  -not -path "./0.82"       `# ignore earlier documentation versions` \
+                  -not -path "./0.82/*"
               )
               echo $FILES | xargs git rm -rf --
           fi
@@ -86,10 +83,13 @@ jobs:
       - name: Build documentation
         run: |
           cd dosbox-staging.github.io
-          DEST_PATH=$(pwd)/${{ env.dest_path_prefix }}
           MKDOCS_SRC_PATH=../dosbox-staging/website/
-          mkdocs build --config-file $MKDOCS_SRC_PATH/mkdocs.yml --site-dir $DEST_PATH --dirty
-          cp -R $MKDOCS_SRC_PATH/docs/.well-known $DEST_PATH
+          TEMP_PATH=$(pwd)/temp-out
+          DEST_PATH=$(pwd)/${{ env.dest_path_prefix }}
+
+          mkdocs build --config-file $MKDOCS_SRC_PATH/mkdocs.yml --site-dir $TEMP_PATH
+          cp -rf $TEMP_PATH/* $DEST_PATH
+          rm -rf $TEMP_PATH
           touch $DEST_PATH/.nojekyll
 
       - name: Set up Git config
@@ -102,7 +102,6 @@ jobs:
         run: |
           cd dosbox-staging.github.io
           git add .
-          git add .well-known/*
           git add .nojekyll
           git commit -m "Deployed current website (${{ env.source_git_hash }})"
           git push

@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <array>
 #include <memory>
+#include <vector>
 
 #include "dos/dos.h"
 #include "hardware/memory.h"
@@ -18,14 +19,15 @@
 #define BIOS_MAX_DISK 10
 
 #define MAX_SWAPPABLE_DISKS 20
-struct diskGeo {
+struct DiskGeometry {
 	uint32_t ksize;  /* Size in kilobytes */
 	uint16_t secttrack; /* Sectors per track */
 	uint16_t headscyl;  /* Heads per cylinder */
 	uint16_t cylcount;  /* Cylinders per side */
 	uint16_t biosval;   /* Type to return from BIOS */
 };
-extern diskGeo DiskGeometryList[];
+
+const std::vector<DiskGeometry>& BIOS_GetDiskGeometryList();
 
 class imageDisk  {
 public:

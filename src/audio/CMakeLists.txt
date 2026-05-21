@@ -1,4 +1,4 @@
-target_sources(libdosboxcommon PRIVATE
+target_sources(dosboxcommon PRIVATE
   clap/event_list.cpp
   clap/library.cpp
   clap/plugin.cpp
@@ -11,3 +11,5 @@ target_sources(libdosboxcommon PRIVATE
   noise_gate.cpp
   opl_capture.cpp
 )
+
+target_link_libraries(dosboxcommon PRIVATE clap mverb)

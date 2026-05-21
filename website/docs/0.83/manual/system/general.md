@@ -1,10 +1,10 @@
 # General
 
-The `[dosbox]` section contains the core system settings --- what type of
-machine to emulate, the amount of memory, and various general emulator
-options.
+This chapter covers general emulator settings from the `[dosbox]` and `[sdl]`
+configuration sections --- what type of machine to emulate, the amount of
+memory, and various general emulator options.
 
-The [machine](#machine) setting selects which video adapter to emulate. The
+The [`machine`](#machine) setting selects which video adapter to emulate. The
 default `svga_s3` (an S3 Trio64 SVGA card) covers the widest range of games.
 You'll only need to change it for titles that specifically require CGA, EGA,
 Tandy, or Hercules graphics. See
@@ -13,17 +13,57 @@ adapter, or the
 [Getting Started guide](../../getting-started/setting-up-prince-of-persia.md)
 for a practical walkthrough.
 
-The default 16 MB of RAM set via [memsize](#memsize) is more than enough for
+The default 16 MB of RAM set via [`memsize`](#memsize) is more than enough for
 nearly all DOS software. A few late DOS-era games need 32 MB, but these are
 rare exceptions.
 
-The [language](#language) setting controls the language of DOSBox Staging's
-own user interface messages.
+
+## General behaviour
+
+When you switch away from DOSBox Staging (e.g., by pressing Alt+Tab), the
+emulator keeps running in the background by default --- sound and all. If
+you'd rather not hear game music while you're doing something else,
+[`mute_when_inactive`](#mute_when_inactive) silences the audio output whenever
+the window loses focus.
+[`pause_when_inactive`](#pause_when_inactive) goes a step further and pauses the
+entire emulation, which is useful for games that don't have a built-in pause
+function.
+
+The [`screensaver`](#screensaver) setting controls whether the OS screensaver is
+allowed to activate while DOSBox is running. By default, it's blocked to
+prevent the screensaver from kicking in during a long cutscene or a game that
+doesn't require constant input.
+
+
+## VESA and VGA options
+
+The [`vesa_modes`](#vesa_modes) setting controls which VESA video modes are
+available beyond the standard VGA modes. The default `compatible` setting
+provides the safest set of modes --- it excludes 320x200 high colour modes
+(which weren't properly supported until the late 1990s) and certain 256-colour
+linear framebuffer modes that cause timing problems in Build Engine games
+([Duke Nukem 3D](https://www.mobygames.com/game/365/duke-nukem-3d/),
+[Shadow Warrior](https://www.mobygames.com/game/1779/shadow-warrior/),
+[Blood](https://www.mobygames.com/game/793/blood/)). The `all` setting adds
+these extra modes and is sometimes needed by late 1990s demoscene productions.
+Use `halfline` only for
+[Extreme Assault](https://www.mobygames.com/game/1396/extreme-assault/), which
+requires a special halfline VESA mode. See
+[`vesa_modes`](#vesa_modes) for the full resolution table.
+
+VGA text mode normally uses 9-pixel-wide character cells.
+[`vga_8dot_font`](#vga_8dot_font) forces 8-pixel-wide characters instead. Very
+few programs need this.
+
+[`vga_render_per_scanline`](#vga_render_per_scanline) is enabled by default and
+emulates accurate per-scanline VGA rendering. A few games crash at startup with
+it enabled (Deus, Ishar 3, Robinson's Requiem, Time Warriors) --- disable it on
+a per-game basis for those titles.
 
 
 ## Video memory delay
 
-The [vmem_delay](#vmem_delay) setting emulates the CPU-throttling effect of
+The [`vmem_delay`](#vmem_delay) setting emulates the CPU-throttling effect of
 accessing slow video memory via the ISA bus on old video cards. This can fix
 flashing graphics and speed issues in Hercules, CGA, EGA, and early VGA games.
 
@@ -32,14 +72,14 @@ games benefit from `vmem_delay = on`:
 
 <div class="compact" markdown>
 
-- [Corncob 3-D](https://www.mobygames.com/game/40284/corncob-3-d-the-other-worlds-campaign/)
-- [Corncob Deluxe](https://www.mobygames.com/game/3480/corncob-deluxe/)
+- [Corncob 3-D (1992)](https://www.mobygames.com/game/40284/corncob-3-d-the-other-worlds-campaign/)
+- [Corncob Deluxe (1993)](https://www.mobygames.com/game/3480/corncob-deluxe/)
 - Crazy Brix (`vmem_delay = 2000` and `cpu_cycles = 70000`)
-- [Future Wars](https://www.mobygames.com/game/2205/future-wars-adventures-in-time/) (also needs `cpu_cycles = 1000`)
-- [Gold of the Aztecs, The](https://www.mobygames.com/game/17245/the-gold-of-the-aztecs/)
-- [Hostages](https://www.mobygames.com/game/6939/hostage-rescue-mission/) (also needs `cpu_cycles = 1500`)
-- [Operation Stealth](https://www.mobygames.com/game/2236/007-james-bond-the-stealth-affair/) (when VGA or EGA is selected in the game's setup)
-- [Quest for Glory II](https://www.mobygames.com/game/169/quest-for-glory-ii-trial-by-fire/) (fixes the too fast vertical scrolling in the intro)
+- [Future Wars (1989)](https://www.mobygames.com/game/2205/future-wars-adventures-in-time/) (also needs `cpu_cycles = 1000`)
+- [Gold of the Aztecs, The (1990)](https://www.mobygames.com/game/17245/the-gold-of-the-aztecs/)
+- [Hostages (1990)](https://www.mobygames.com/game/6939/hostage-rescue-mission/) (also needs `cpu_cycles = 1500`)
+- [Operation Stealth (1990)](https://www.mobygames.com/game/2236/007-james-bond-the-stealth-affair/) (when VGA or EGA is selected in the game's setup)
+- [Quest for Glory II (1990)](https://www.mobygames.com/game/169/quest-for-glory-ii-trial-by-fire/) (fixes the too fast vertical scrolling in the intro)
 
 </div>
 
@@ -48,6 +88,33 @@ games benefit from `vmem_delay = on`:
 
 You can set the general system parameters in the `[dosbox]` configuration
 section.
+
+
+### General behaviour
+
+The settings below are configured in the `[sdl]` section.
+
+##### mute_when_inactive
+
+:   Mute the sound when the window is inactive.
+
+    Possible values: `on`, `off` *default*{ .default }
+
+
+##### pause_when_inactive
+
+:   Pause emulation when the window is inactive.
+
+    Possible values: `on`, `off` *default*{ .default }
+
+
+##### screensaver
+
+:   Use `allow` or `block` to override the `SDL_VIDEO_ALLOW_SCREENSAVER`
+    environment variable which usually blocks the OS screensaver while the
+    emulator is running.
+
+    Possible values: `auto` *default*{ .default }, `allow`, `block`
 
 
 ### Video adapter
@@ -61,9 +128,9 @@ section.
     <div class="compact" markdown>
 
     - `hercules` -- Hercules Graphics Card (HGC) (see
-      [monochrome_palette](../graphics/rendering.md#monochrome_palette)).
+      [`monochrome_palette`](../graphics/rendering.md#monochrome_palette)).
     - `cga_mono` -- CGA adapter connected to a monochrome monitor (see
-      [monochrome_palette](../graphics/rendering.md#monochrome_palette)).
+      [`monochrome_palette`](../graphics/rendering.md#monochrome_palette)).
     - `cga` -- IBM Color Graphics Adapter (CGA). Also enables composite
       video emulation (see
       [Composite video](../graphics/composite-video.md)).
@@ -74,16 +141,16 @@ section.
     - `ega` -- IBM Enhanced Graphics Adapter (EGA).
     - `svga_paradise` -- Paradise PVGA1A SVGA card (no VESA VBE; 512K vmem
       by default, can be set to 256K or 1MB with
-      [vmemsize](#vmemsize)). This is the closest to IBM's original VGA
+      [`vmemsize`](#vmemsize)). This is the closest to IBM's original VGA
       adapter.
     - `svga_et3000` -- Tseng Labs ET3000 SVGA card (no VESA VBE; fixed 512K
       vmem).
     - `svga_et4000` -- Tseng Labs ET4000 SVGA card (no VESA VBE; 1MB vmem
       by default, can be set to 256K or 512K with
-      [vmemsize](#vmemsize)).
+      [`vmemsize`](#vmemsize)).
     - `svga_s3` *default*{ .default } -- S3 Trio64 (VESA VBE 2.0; 4MB vmem
       by default, can be set to 512K, 1MB, 2MB, or 8MB with
-      [vmemsize](#vmemsize)).
+      [`vmemsize`](#vmemsize)).
     - `vesa_oldvbe` -- Same as `svga_s3` but limited to VESA VBE 1.2.
     - `vesa_nolfb` -- Same as `svga_s3` (VESA VBE 2.0), plus the "no linear
       framebuffer" hack (needed only by a few games).
@@ -93,7 +160,7 @@ section.
 ##### vmemsize
 
 :   Video memory in MB (1--8) or KB (256 to 8192). See the
-    [machine](#machine) setting for the list of valid options and defaults
+    [`machine`](#machine) setting for the list of valid options and defaults
     per adapter.
 
     Possible values: `auto` *default*{ .default } (uses the default for the
@@ -108,7 +175,7 @@ section.
 
     - `compatible` *default*{ .default } -- Only the most compatible VESA
       modes for the configured video memory size. Recommended with 4 or 8 MB
-      of video memory ([vmemsize](#vmemsize)) for the widest compatibility
+      of video memory ([`vmemsize`](#vmemsize)) for the widest compatibility
       with games. 320x200 high colour modes are excluded as they were not
       properly supported until the late '90s. The 256-colour linear
       framebuffer 320x240, 400x300, and 512x384 modes are also excluded as
@@ -156,35 +223,6 @@ section.
     - 848&times;480 widescreen modes (8/15/16/32-bit)
 
     </div>
-
-
-##### dos_rate
-
-:   Override the emulated DOS video mode's refresh rate with a custom rate.
-
-    Possible values:
-
-    - `default` *default*{ .default } -- Don't override; use the emulated
-      DOS video mode's refresh rate.
-    - `host` -- Override the refresh rate of all DOS video modes with the
-      refresh rate of your monitor. This might allow you to play some 70 Hz
-      VGA games with perfect [vsync](../graphics/display-and-window.md#vsync)
-      on a 60 Hz fixed refresh rate monitor.
-    - `<number>` -- Override the refresh rate of all DOS video modes with a
-      fixed rate specified in Hz (valid range is from 24.000 to 1000.000).
-      This is a niche option for a select few fast-paced mid to late 1990s 3D
-      games for high refresh rate gaming.
-
-    !!! important
-
-        Many games will misbehave when overriding the DOS video mode's
-        refresh rate with non-standard values. This can manifest in glitchy
-        video, sped-up or slowed-down audio, jerky mouse movement, mouse
-        button presses not being registered, and even gameplay bugs.
-        Overriding the DOS refresh rate is a hack that only works acceptably
-        with a small subset of all DOS games (typically mid to late 1990s
-        games).
-
 
 
 ##### vga_8dot_font
@@ -271,22 +309,6 @@ section.
 
 
 ### DOS & shell
-
-##### language
-
-:   Select the DOS messages language.
-
-    Possible values:
-
-    - `auto` *default*{ .default } -- Detect the language from the host OS.
-    - `<value>` -- Load a translation from the given file.
-
-    !!! note
-
-        The following language files are available: `de`, `en`, `es`, `fr`,
-        `it`, `nl`, `pl`, `pt_BR`, and `ru`. English is built-in; the rest
-        is stored in the bundled `resources/translations` directory.
-
 
 ##### autoexec_section
 

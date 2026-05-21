@@ -5,8 +5,8 @@
 #include "bridge.h"
 #include "webserver.h"
 
-#include "libs/http/http.h"
-#include "libs/json/json.h"
+#include "http/http.h"
+#include "json/json.h"
 
 #include "cpu/paging.h"
 #include "cpu/registers.h"
@@ -132,43 +132,52 @@ void AllocMemoryCommand::Post(const httplib::Request& req, httplib::Response& re
 	auto j        = json::parse(req.body);
 	uint32_t size = j.at("size");
 
-	auto area     = MemoryArea::Conv;
-	auto strategy = AllocStrategy::BestFit;
+	const auto area = [&]() {
+		using enum MemoryArea;
 
-	if (j.contains("area")) {
-		std::string req_area = j["area"];
-		upcase(req_area);
+		if (j.contains("area")) {
+			std::string req_area = j["area"];
+			upcase(req_area);
 
-		if (req_area == "CONV") {
-			area = MemoryArea::Conv;
-		} else if (req_area == "UMA") {
-			area = MemoryArea::Uma;
-		} else if (req_area == "XMS") {
-			area = MemoryArea::Xms;
+			if (req_area == "CONV") {
+				return Conv;
+			} else if (req_area == "UMA") {
+				return Uma;
+			} else if (req_area == "XMS") {
+				return Xms;
+			} else {
+				throw std::invalid_argument(
+				        "Invalid memory area: " + req_area);
+			}
 		} else {
-			throw std::invalid_argument("Invalid memory area: " + req_area);
+			return Conv;
 		}
-	}
+	}();
 
-	if (j.contains("strategy")) {
-		std::string req_strategy = j["strategy"];
-		upcase(req_strategy);
+	const auto strategy = [&]() {
+		using enum AllocStrategy;
 
-		if (req_strategy == "FIRST_FIT") {
-			strategy = AllocStrategy::FirstFit;
-		} else if (req_strategy == "BEST_FIT") {
-			strategy = AllocStrategy::BestFit;
-		} else if (req_strategy == "LAST_FIT") {
-			strategy = AllocStrategy::LastFit;
+		if (j.contains("strategy")) {
+			std::string req_strategy = j["strategy"];
+			upcase(req_strategy);
+
+			if (req_strategy == "FIRST_FIT") {
+				return FirstFit;
+			} else if (req_strategy == "BEST_FIT") {
+				return BestFit;
+			} else if (req_strategy == "LAST_FIT") {
+				return LastFit;
+			} else {
+				throw std::invalid_argument(
+				        "Invalid alloc strategy: " + req_strategy);
+			}
 		} else {
-			throw std::invalid_argument("Invalid alloc strategy: " +
-			                            req_strategy);
+			return BestFit;
 		}
+	}();
 
-		if (area == MemoryArea::Xms && strategy != AllocStrategy::BestFit) {
-			throw std::invalid_argument(
-			        "XMS allocator only supports best_fit");
-		}
+	if (area == MemoryArea::Xms && strategy != AllocStrategy::BestFit) {
+		throw std::invalid_argument("XMS allocator only supports best_fit");
 	}
 
 	AllocMemoryCommand cmd(size, area, strategy);

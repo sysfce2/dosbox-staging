@@ -59,10 +59,27 @@ appropriate monitor emulation based on the current video mode:
 - **`crt-auto-arcade-sharp`** --- A sharper arcade variant that retains the
   thick scanlines but with the sharpness of a typical PC monitor.
 
+The CRT shaders generally need at least 3 times the vertical resolution of the
+emulated video mode to function. If the vertical resolution is less than that,
+DOSBox Staging will revert to sharp pixels (the `sharp` shader). For example,
+for the 640&times;480 VGA mode, the viewport height must be 480 &times; 3 =
+1440 pixels or greater.
+
+!!! note "VGA double scanning"
+
+    The 320&times;200 mode is double-scanned to 640&times;400 on VGA ---
+    that's just how the VGA hardware works, and emulating this is required for
+    authentic-looking results (two scanlines per pixel is the iconic
+    low-resolution VGA look). On all other graphics adapters, 320&times;200 is
+    single-scanned, so it remains 320&times;200.
+
+    On 1080p, the auto CRT shaders employ some "fake double scanning" trickery
+    to maximise the image for emulated VGA modes.
+
 
 ## Integer scaling
 
-The [integer_scaling](#integer_scaling) setting constrains the horizontal or
+The [`integer_scaling`](#integer_scaling) setting constrains the horizontal or
 vertical scaling factor to integer values when upscaling the image. This
 avoids uneven scanlines and interference artifacts with CRT shaders.
 
@@ -306,14 +323,14 @@ Enable deinterlacing per-game rather than globally for best results.
 
     <div class="compact" markdown>
 
-    - [Wing Commander IV](https://www.mobygames.com/game/343/wing-commander-iv-the-price-of-freedom/)
-    - [Phantasmagoria](https://www.mobygames.com/game/1164/roberta-williams-phantasmagoria/)
-    - [Gabriel Knight 2](https://www.mobygames.com/game/118/the-beast-within-a-gabriel-knight-mystery/)
-    - [Crusader: No Remorse](https://www.mobygames.com/game/851/crusader-no-remorse/)
-    - [Crusader: No Regret](https://www.mobygames.com/game/852/crusader-no-regret/)
-    - [CyberMage](https://www.mobygames.com/game/791/cybermage-darklight-awakening/)
-    - [Angel Devoid](https://www.mobygames.com/game/3468/angel-devoid-face-of-the-enemy/)
-    - [Heroes of Might and Magic II](https://www.mobygames.com/game/1513/heroes-of-might-and-magic-ii-the-succession-wars/)
+    - [Wing Commander IV (1996)](https://www.mobygames.com/game/343/wing-commander-iv-the-price-of-freedom/)
+    - [Phantasmagoria (1995)](https://www.mobygames.com/game/1164/roberta-williams-phantasmagoria/)
+    - [Gabriel Knight 2 (1995)](https://www.mobygames.com/game/118/the-beast-within-a-gabriel-knight-mystery/)
+    - [Crusader: No Remorse (1995)](https://www.mobygames.com/game/851/crusader-no-remorse/)
+    - [Crusader: No Regret (1996)](https://www.mobygames.com/game/852/crusader-no-regret/)
+    - [CyberMage (1995)](https://www.mobygames.com/game/791/cybermage-darklight-awakening/)
+    - [Angel Devoid (1996)](https://www.mobygames.com/game/3468/angel-devoid-face-of-the-enemy/)
+    - [Heroes of Might and Magic II (1996)](https://www.mobygames.com/game/1513/heroes-of-might-and-magic-ii-the-succession-wars/)
 
     </div>
 
@@ -340,14 +357,14 @@ EGA, VGA, Hercules) and any resolution, and can be combined with any shader.
 
     <div class="compact" markdown>
 
-    - [Leisure Suit Larry 2](https://www.mobygames.com/game/409/leisure-suit-larry-goes-looking-for-love-in-several-wrong-places/) & [3](https://www.mobygames.com/game/412/leisure-suit-larry-iii-passionate-patti-in-pursuit-of-the-pulsat/)
-    - [Quest for Glory I](https://www.mobygames.com/game/168/heros-quest-so-you-want-to-be-a-hero/) & [II](https://www.mobygames.com/game/169/quest-for-glory-ii-trial-by-fire/)
-    - [Space Quest III](https://www.mobygames.com/game/142/space-quest-iii-the-pirates-of-pestulon/)
-    - [The Secret of Monkey Island](https://www.mobygames.com/game/616/the-secret-of-monkey-island/) (EGA version)
-    - [Loom](https://www.mobygames.com/game/176/loom/)
-    - [Spellcasting 101](https://www.mobygames.com/game/1027/spellcasting-101-sorcerers-get-all-the-girls/)
-    - [Timequest](https://www.mobygames.com/game/1026/timequest/)
-    - [Gateway](https://www.mobygames.com/game/317/frederik-pohls-gateway/)
+    - [Leisure Suit Larry 2 (1988)](https://www.mobygames.com/game/409/leisure-suit-larry-goes-looking-for-love-in-several-wrong-places/) & [3](https://www.mobygames.com/game/412/leisure-suit-larry-iii-passionate-patti-in-pursuit-of-the-pulsat/)
+    - [Quest for Glory I (1989)](https://www.mobygames.com/game/168/heros-quest-so-you-want-to-be-a-hero/) & [II](https://www.mobygames.com/game/169/quest-for-glory-ii-trial-by-fire/)
+    - [Space Quest III (1989)](https://www.mobygames.com/game/142/space-quest-iii-the-pirates-of-pestulon/)
+    - [The Secret of Monkey Island (1990)](https://www.mobygames.com/game/616/the-secret-of-monkey-island/) (EGA version)
+    - [Loom (1990)](https://www.mobygames.com/game/176/loom/)
+    - [Spellcasting 101 (1990)](https://www.mobygames.com/game/1027/spellcasting-101-sorcerers-get-all-the-girls/)
+    - [Timequest (1991)](https://www.mobygames.com/game/1026/timequest/)
+    - [Gateway (1992)](https://www.mobygames.com/game/317/frederik-pohls-gateway/)
 
     </div>
 
@@ -425,6 +442,37 @@ the shader source.
 
 
 
+## Image adjustments
+
+The image adjustment system emulates the controls of a CRT monitor. The
+[`image_adjustments`](#image_adjustments) setting enables or disables all
+adjustments. When disabled, the raw RGB values from the emulated video adapter
+are displayed without any processing (except colour space conversion).
+
+The available adjustments are:
+
+- [`brightness`](#brightness) and [`contrast`](#contrast) emulate the
+  corresponding CRT monitor knobs --- brightness sets the black point, contrast
+  sets the white point.
+- [`gamma`](#gamma) applies additional gamma correction relative to the
+  emulated monitor's gamma.
+- [`digital_contrast`](#digital_contrast) and [`saturation`](#saturation) are
+  applied directly to the raw framebuffer RGB values, unlike the CRT-emulating
+  brightness/contrast controls.
+- [`color_temperature`](#color_temperature) adjusts the white point in Kelvin;
+  [`color_temperature_luma_preserve`](#color_temperature_luma_preserve)
+  controls how much luminosity is preserved during the adjustment.
+- [`red_gain`](#red_gain), [`green_gain`](#green_gain), and
+  [`blue_gain`](#blue_gain) adjust individual colour channel gain.
+
+The image adjustment settings can be tweaked in real-time using
+[hotkeys](../appendices/shortcuts.md#image-adjustments) --- use
+"Previous/Next Image Adjustment" to select a setting and
+"Increase/Decrease" to adjust its value. The adjusted values are logged so you
+can copy them into your config file. Alternatively, use the `CONFIG -wc` DOS
+command to write the current settings to a config file.
+
+
 ## Configuration settings
 
 You can set the rendering parameters in the `[render]` configuration section.
@@ -452,7 +500,7 @@ You can set the rendering parameters in the `[render]` configuration section.
       Amiga games) need square pixels to appear as the artists intended.
 
     - `stretch` -- Calculate the aspect ratio from the viewport's dimensions.
-      Combined with the [viewport](#viewport) setting, this mode is useful to
+      Combined with the [`viewport`](#viewport) setting, this mode is useful to
       force arbitrary aspect ratios (e.g., stretching DOS games to fullscreen
       on 16:9 displays) and to emulate the horizontal and vertical stretch
       controls of CRT monitors.
@@ -462,15 +510,15 @@ You can set the rendering parameters in the `[render]` configuration section.
 
 :   Constrain the horizontal or vertical scaling factor to the largest
     integer value so the image still fits into the viewport. The configured
-    aspect ratio is always maintained according to the [aspect](#aspect) and
-    [viewport](#viewport) settings, which may result in a non-integer scaling
+    aspect ratio is always maintained according to the [`aspect`](#aspect) and
+    [`viewport`](#viewport) settings, which may result in a non-integer scaling
     factor in the other dimension. If the image is larger than the viewport,
     the integer scaling constraint is auto-disabled (same as `off`).
 
     Possible values:
 
     - `auto` *default*{ .default } -- A special vertical mode auto-enabled
-      only for the adaptive CRT shaders (see [shader](#shader)). This mode
+      only for the adaptive CRT shaders (see [`shader`](#shader)). This mode
       has refinements over standard vertical integer scaling: 3.5x and 4.5x
       scaling factors are also allowed, and integer scaling is disabled above
       5.0x scaling.
@@ -487,13 +535,13 @@ You can set the rendering parameters in the `[render]` configuration section.
 
 :   Set the viewport size. This is the maximum drawable area; the video
     output is always contained within the viewport while taking the configured
-    aspect ratio into account (see [aspect](#aspect)).
+    aspect ratio into account (see [`aspect`](#aspect)).
 
     Possible values:
 
     - `fit` *default*{ .default } -- Fit the viewport into the available
       window/screen. There might be padding (black areas) around the image
-      with [integer_scaling](#integer_scaling) enabled.
+      with [`integer_scaling`](#integer_scaling) enabled.
 
     - `WxH` -- Set a fixed viewport size in WxH format in logical units
       (e.g., `960x720`). The specified size must not be larger than the
@@ -508,13 +556,13 @@ You can set the rendering parameters in the `[render]` configuration section.
       horizontal and vertical scaling factors (valid range is from 20% to
       300%). The resulting viewport is allowed to extend beyond the bounds of
       the window or screen. Useful to force arbitrary display aspect ratios
-      with [aspect](#aspect) set to `stretch` and to "zoom" into the image.
+      with [`aspect`](#aspect) set to `stretch` and to "zoom" into the image.
       This effectively emulates the horizontal and vertical stretch controls
       of CRT monitors.
 
     !!! note
 
-        - Using `relative` mode with [integer_scaling](#integer_scaling)
+        - Using `relative` mode with [`integer_scaling`](#integer_scaling)
           enabled could lead to surprising (but correct) results.
 
         - Use the `Stretch Axis`, `Inc Stretch`, and `Dec Stretch` hotkey
@@ -528,7 +576,7 @@ You can set the rendering parameters in the `[render]` configuration section.
 
 :   Set an adaptive CRT monitor emulation shader or a regular shader.
     Shaders are only supported in the OpenGL output mode (see
-    [output](../graphics/display-and-window.md#output)).
+    [`output`](../graphics/display-and-window.md#output)).
 
     Adaptive CRT shader options:
 
@@ -598,11 +646,11 @@ You can set the rendering parameters in the `[render]` configuration section.
 ##### image_adjustments
 
 :   Enable image adjustments. When disabled, the image adjustment settings in
-    the render section (e.g., [crt_color_profile](#crt_color_profile),
-    [brightness](#brightness), [contrast](#contrast), etc.) have no effect
+    the render section (e.g., [`crt_color_profile`](#crt_color_profile),
+    [`brightness`](#brightness), [`contrast`](#contrast), etc.) have no effect
     and the raw RGB values are used for the video output. The colour space
     conversion is always active, that cannot be disabled (see
-    [color_space](#color_space)).
+    [`color_space`](#color_space)).
 
     Possible values: `on` *default*{ .default }, `off`
 
@@ -624,7 +672,7 @@ You can set the rendering parameters in the `[render]` configuration section.
 
 :   Set a CRT colour profile for more authentic video output emulation. All
     profiles have a built-in colour temperature (white point) that you can
-    tweak further with the [color_temperature](#color_temperature) setting.
+    tweak further with the [`color_temperature`](#color_temperature) setting.
 
     Possible values:
 
@@ -671,7 +719,7 @@ You can set the rendering parameters in the `[render]` configuration section.
 :   Set the contrast of the video output (`65` by default). Valid range is 0
     to 100. This emulates the contrast control of CRT monitors that sets the
     white point; higher values will result in raised blacks (lower the
-    [brightness](#brightness) control to compensate).
+    [`brightness`](#brightness) control to compensate).
 
 
 ##### gamma
@@ -685,13 +733,13 @@ You can set the rendering parameters in the `[render]` configuration section.
 
 :   Set the digital contrast of the video output (`0` by default). Valid
     range is -50 to 50. This works very differently from the
-    [contrast](#contrast) virtual monitor setting; digital contrast is applied
+    [`contrast`](#contrast) virtual monitor setting; digital contrast is applied
     to the raw RGB values of the framebuffer image.
 
 ##### black_level
 
 :   Raise the black level of the video output. It is applied before the
-    [brightness](#brightness) and [contrast](#contrast) settings which can
+    [`brightness`](#brightness) and [`contrast`](#contrast) settings which can
     also raise the black level, so it effectively acts as a black level
     boost.
 
@@ -713,7 +761,7 @@ You can set the rendering parameters in the `[render]` configuration section.
 
 :   Set the saturation of the video output (`0` by default). Valid range is
     -50 to 50. This is digital saturation applied to the raw RGB values of
-    the framebuffer image, similarly to [digital_contrast](#digital_contrast).
+    the framebuffer image, similarly to [`digital_contrast`](#digital_contrast).
 
 ##### color_temperature
 
@@ -840,8 +888,8 @@ You can set the rendering parameters in the `[render]` configuration section.
     !!! note
 
         These colours will be further adjusted by the video output settings
-        (see [crt_color_profile](#crt_color_profile),
-        [brightness](#brightness), [saturation](#saturation), etc.)
+        (see [`crt_color_profile`](#crt_color_profile),
+        [`brightness`](#brightness), [`saturation`](#saturation), etc.)
 
 
 ##### deinterlacing
@@ -870,7 +918,7 @@ You can set the rendering parameters in the `[render]` configuration section.
 
     !!! note
 
-        Enabling vertical [integer_scaling](#integer_scaling) is recommended
+        Enabling vertical [`integer_scaling`](#integer_scaling) is recommended
         on lower resolution displays to avoid interference artifacts when
         using lower deinterlacing strengths. Alternatively, use `full`
         strength to completely eliminate all potential interference patterns.

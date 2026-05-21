@@ -26,7 +26,7 @@ However, some games have poor or limited calibration, resulting in drift or
 offset despite calibration attempts.
 
 For these cases, enable the
-[use_joy_calibration_hotkeys](#use_joy_calibration_hotkeys) setting and
+[`use_joy_calibration_hotkeys`](#use_joy_calibration_hotkeys) setting and
 adjust the joystick position in real time. Each tap of the hotkeys logs the
 calibration values, which you can then save in a per-game config:
 
@@ -36,6 +36,32 @@ use_joy_calibration_hotkeys = off
 joy_x_calibration           = 0.576211,0.02
 joy_y_calibration           = 0.5474,-0.005
 ```
+
+## Advanced joystick settings
+
+The [`timed`](#timed) setting controls how joystick positions are measured.
+When enabled (the default), positions are timed using the emulated system
+clock, which makes calibration independent of the CPU
+[`cpu_cycles`](../system/cpu.md#cpu_cycles) setting. When disabled, positions
+are measured by counting port reads --- just like real hardware --- which means
+changing CPU cycles will throw off joystick calibration. The timed mode works
+well for most setups, but if your joystick drifts despite calibration, try
+disabling it --- the simpler untimed mode sometimes works better with certain
+USB controllers.
+[`circularinput`](#circularinput) compensates for analog sticks that are
+physically constrained to circular motion; pushing into a corner only reaches
+about 71% of the maximum range, and enabling this maps the circular input to a
+square coordinate space so you get full range in all directions.
+
+[`autofire`](#autofire) toggles each button on and off every frame while held,
+simulating rapid fire for arcade-style and shoot-em-up games.
+[`swap34`](#swap34) swaps the X and Y axes of the second joystick (axes 3 and
+4 in DOS game port terminology) if they appear reversed.
+[`buttonwrap`](#buttonwrap) makes extra controller buttons wrap around to the
+beginning of the emulated button set --- for example, if emulation provides 4
+buttons and your controller has 8, button 5 acts as button 1, button 6 as
+button 2, and so on. Without wrapping, excess buttons are simply ignored.
+
 
 ## Configuration settings
 
@@ -145,7 +171,7 @@ section.
       respectively.
 
     Each tap will report X or Y calibration values you can set in
-    [joy_x_calibration](#joy_x_calibration) and
-    [joy_y_calibration](#joy_y_calibration). When you find parameters that
+    [`joy_x_calibration`](#joy_x_calibration) and
+    [`joy_y_calibration`](#joy_y_calibration). When you find parameters that
     work, quit the game, switch this setting back to `off`, and populate the
     reported calibration parameters.

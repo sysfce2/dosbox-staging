@@ -170,6 +170,17 @@ channel](../mixer.md#list-of-mixer-channels), and the DAC to the **TANDYDAC**
 channel.
 
 
+## Hanging note fade-out
+
+The Tandy PSG can produce hanging notes when a game doesn't properly silence
+its channels --- a note plays indefinitely instead of stopping. This happened
+on real hardware too, but rather than faithfully reproducing the annoyance,
+the [`tandy_fadeout`](#tandy_fadeout) setting fades out any remaining sound
+after the game stops writing to the sound chip. The default `on` preset waits
+500 ms after the last write, then fades over 500 ms. Custom timing can be
+specified as two values (wait and fade period in milliseconds).
+
+
 ## Configuration settings
 
 Tandy 3 Voice settings are to be configured in the `[speaker]` section.
@@ -200,7 +211,7 @@ Tandy 3 Voice settings are to be configured in the `[speaker]` section.
       play forever.
     - `on` -- Wait 0.5s before fading out over a 0.5s period.
     - `<custom>` -- Custom fade-out definition; see
-      [opl_fadeout](adlib-cms-sound-blaster.md#opl_fadeout) for details on
+      [`opl_fadeout`](adlib-cms-sound-blaster.md#opl_fadeout) for details on
       the format.
 
 

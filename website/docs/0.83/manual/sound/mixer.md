@@ -8,7 +8,7 @@ independently per channel.
 The mixer uses a 32-bit floating-point processing path internally, so
 individual channels cannot be overloaded into clipping by high per-channel
 volume settings. A fixed 20 Hz high-pass filter on the master output removes
-DC offset and subsonic rumble. An auto-levelling [compressor](#compressor) on
+DC offset and subsonic rumble. An auto-levelling [`compressor`](#compressor) on
 the master channel prevents clipping of the final output.
 
 The default master volume is 50% (-6 dB) to avoid audible distortion in games
@@ -20,6 +20,23 @@ The mixer runs in its own dedicated thread, which greatly reduces and often
 completely eliminates audio stuttering and glitches. This is especially
 noticeable with the Roland MT-32, FluidSynth, OPL synth, and Red Book CD
 Audio.
+
+
+## Audio output configuration
+
+The mixer's internal sample rate is set via [`rate`](#rate). The default
+48000 Hz matches the native rate of virtually all modern audio hardware, and
+changing it is almost never necessary --- the OS will resample non-standard
+rates to 48000 Hz anyway.
+
+The [`nosound`](#nosound) setting enables silent mode. Sound is still fully
+emulated, but no audio reaches the host. This can be useful for capturing
+the emulated audio output to a WAV file without hearing it, or for running
+DOSBox on headless systems without audio hardware.
+
+For buffer tuning ([`blocksize`](#blocksize), [`prebuffer`](#prebuffer),
+[`negotiate`](#negotiate)) and troubleshooting audio glitches, see
+[Minimising audio glitches](#minimising-audio-glitches) below.
 
 
 ## The MIXER command
@@ -140,7 +157,7 @@ sections of the manual where they're described in detail.
 | **COVOX**       | [Covox Speech Thing digital audio](sound-devices/covox-variants.md#covox-speech-thing) | No
 | **DISNEY**      | [Disney Sound Source (DSS) digital audio](sound-devices/covox-variants.md#disney-sound-source) | No
 | **DISKNOISE**   | [Disk noise emulation](disk-noise.md) | No
-| **FSYNTH**      | [FluidSynth MIDI synthesiser](sound-devices/general-midi.md#fluidsynth) | Yes
+| **FSYNTH**      | [FluidSynth MIDI synthesiser](sound-devices/fluidsynth.md) | Yes
 | **GUS**         | [Gravis UltraSound digital audio](sound-devices/gravis-ultrasound.md) | Yes
 | **IMFC**        | [IBM Music Feature Card](sound-devices/imfc.md) | Yes
 | **MASTER**      | Master output channel                        | Yes
@@ -152,7 +169,7 @@ sections of the manual where they're described in detail.
 | **PS1DAC**      | [IBM PS/1 Audio digital audio](sound-devices/ibm-ps1audio.md) | No
 | **REELMAGIC**   | [ReelMagic MPEG audio](../graphics/reelmagic.md) | Yes
 | **SB**          | [Sound Blaster digital audio](sound-devices/adlib-cms-sound-blaster.md) | Yes[^stereo]
-| **SOUNDCANVAS** | [Roland Sound Canvas synthesiser](sound-devices/general-midi.md#sound-canvas) | Yes
+| **SOUNDCANVAS** | [Roland Sound Canvas synthesiser](sound-devices/sound-canvas.md) | Yes
 | **STON1**       | [Stereo-on-1 digital audio](sound-devices/covox-variants.md#stereo-on-1-dac) | Yes
 | **TANDY**       | [Tandy 1000 synthesiser](sound-devices/tandy.md) | No
 | **TANDYDAC**    | [Tandy 1000 digital audio](sound-devices/tandy.md) | No
@@ -165,7 +182,7 @@ sections of the manual where they're described in detail.
 ## Denoiser
 
 The [OPL synth](sound-devices/adlib-cms-sound-blaster.md) and the original
-SC-55 mk1 [Sound Canvas](sound-devices/general-midi.md#sound-canvas-emulation)
+SC-55 mk1 [Sound Canvas](sound-devices/sound-canvas.md)
 models produce very low-level residual noise as part of their faithful
 hardware emulation. This noise is authentic --- real hardware behaved the same
 way --- but it can be slightly annoying on good-quality headphones or in quiet
@@ -182,19 +199,19 @@ triggered by some games.
 
     <div class="compact" markdown>
 
-    - [Beneath a Steel Sky](https://www.mobygames.com/game/386/beneath-a-steel-sky/) --- audible constant noise during the intro
-    - [Doom](https://www.mobygames.com/game/1068/doom/) --- chord-like noise at the start of the E2M2 level music
-    - [Frederik Pohl's Gateway](https://www.mobygames.com/game/317/frederik-pohls-gateway/) / [Gateway II: Homeworld](https://www.mobygames.com/game/318/gateway-ii-homeworld/) --- hanging note after exiting to DOS
-    - [Gods](https://www.mobygames.com/game/1511/gods/) --- audible noise in-game between the quiet sound effects
+    - [Beneath a Steel Sky (1994)](https://www.mobygames.com/game/386/beneath-a-steel-sky/) --- audible constant noise during the intro
+    - [Doom (1993)](https://www.mobygames.com/game/1068/doom/) --- chord-like noise at the start of the E2M2 level music
+    - [Frederik Pohl's Gateway (1992)](https://www.mobygames.com/game/317/frederik-pohls-gateway/) / [Gateway II: Homeworld (1993)](https://www.mobygames.com/game/318/gateway-ii-homeworld/) --- hanging note after exiting to DOS
+    - [Gods (1992)](https://www.mobygames.com/game/1511/gods/) --- audible noise in-game between the quiet sound effects
     - [Tetris Classic (1992)](https://www.mobygames.com/game/4539/tetris-classic/) --- buzzing noise after each level's intro music has finished playing
-    - [Wizardry 6: Bane of the Cosmic Forge](https://www.mobygames.com/game/709/wizardry-bane-of-the-cosmic-forge/) --- hanging notes after sound effects
+    - [Wizardry 6: Bane of the Cosmic Forge (1990)](https://www.mobygames.com/game/709/wizardry-bane-of-the-cosmic-forge/) --- hanging notes after sound effects
 
     </div>
 
 
 ## Minimising audio glitches
 
-Even after setting the optimal [cpu_cycles](../system/cpu.md#cpu_cycles)
+Even after setting the optimal [`cpu_cycles`](../system/cpu.md#cpu_cycles)
 value, you may hear occasional clicks or pops. This depends on your
 particular hardware, audio driver, and operating system combination.
 
@@ -217,7 +234,12 @@ The `blocksize` should be a power of two: 256, 512, 1024, 2048, 4096, or
 further if glitches persist, but keep in mind that larger buffers mean more
 noticeable input-to-sound delay.
 
-Also make sure your [cpu_cycles](../system/cpu.md#cpu_cycles) isn't set
+The [`negotiate`](#negotiate) setting lets the audio driver override your
+[`blocksize`](#blocksize) with a value it considers optimal. It's enabled by
+default on macOS and Linux; disable it only if you need to force a specific
+buffer size.
+
+Also make sure your [`cpu_cycles`](../system/cpu.md#cpu_cycles) isn't set
 higher than the game actually needs --- overdoing it wastes host CPU
 resources that could otherwise go towards glitch-free audio emulation.
 
@@ -255,20 +277,20 @@ settings (crossfeed, reverb, chorus), see [Mixer effects](mixer-effects.md#confi
     `512` on other platforms by default). Valid range is 64 to 8192. Should
     be set to power-of-two values (e.g., 256, 512, 1024). Larger values
     might help with sound stuttering but will introduce more latency. Also
-    see [negotiate](#negotiate).
+    see [`negotiate`](#negotiate).
 
 
 ##### prebuffer
 
 :   How many milliseconds of sound to render in advance on top of
-    [blocksize](#blocksize) (`25` on Windows, `20` on other platforms by
+    [`blocksize`](#blocksize) (`25` on Windows, `20` on other platforms by
     default). Larger values might help with sound stuttering but will
     introduce more latency.
 
 
 ##### negotiate
 
-:   Negotiate a possibly better [blocksize](#blocksize) setting (`off` on
+:   Negotiate a possibly better [`blocksize`](#blocksize) setting (`off` on
     Windows, `on` on other platforms by default). Enable if you're not
     getting audio or the sound is stuttering with your `blocksize` setting.
     Disable to force the manually set `blocksize` value.
